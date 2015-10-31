@@ -2,14 +2,14 @@
 from __future__ import unicode_literals
 
 import cgi
-import urllib2
-import urlparse
 
 import jinja2
 from dateutil import parser
 from annotator import annotation
 from annotator import document
 
+from h._compat import urlparse
+from h._compat import url_unquote
 
 def _format_document_link(href, title, link_text, hostname):
     """Return a document link for the given components.
@@ -275,11 +275,11 @@ class Annotation(annotation.Annotation):
         if self.filename:
             # self.filename is already escaped so we don't need to escape
             # it again here, but we do want to unquote it for readability.
-            return urllib2.unquote(self.filename)
+            return url_unquote(self.filename)
         else:
             # self.uri is already escaped so we don't need to escape
             # it again here, but we do want to unquote it for readability.
-            return urllib2.unquote(self.uri)
+            return url_unquote(self.uri)
 
     @property
     def hostname_or_filename(self):
@@ -358,7 +358,7 @@ class Annotation(annotation.Annotation):
         lower = title.lower()
         if lower.startswith("http://") or lower.startswith("https://"):
             parts = urlparse.urlparse(title)
-            return urllib2.unquote(parts.netloc + parts.path)
+            return url_unquote(parts.netloc + parts.path)
 
         else:
             return title
