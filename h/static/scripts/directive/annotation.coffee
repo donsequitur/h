@@ -429,7 +429,11 @@ AnnotationController = [
       # move any new annotations to the currently focused group when
       # switching groups. See GH #2689 for context
       if !model.id
-        model.group = groups.focused().id
+        debugger
+        newGroup = groups.focused().id
+        if permissions.isShared(vm.annotation.permissions, vm.annotation.group)
+          model.permissions = permissions.shared(newGroup)
+        model.group = newGroup
 
     this
 ]

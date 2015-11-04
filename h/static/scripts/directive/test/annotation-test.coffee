@@ -605,6 +605,43 @@ describe 'annotation', ->
       $rootScope.$broadcast(events.GROUP_FOCUSED)
       assert.equal(annotation.group, 'new-group')
 
+    it "updates perms when moving new annotations to the focused group", ->
+      # id must be null so that AnnotationController considers this a new
+      # annotation.
+      annotation.id = null
+      annotation.group = 'old-group'
+      annotation.permissions = {read: [annotation.group]}
+
+      # This is a shared annotation.
+      fakePermissions.isShared.returns(true)
+      createDirective()
+
+      # Make permissions.shared() behave like we expect it to.
+      fakePermissions.shared = (groupId) ->
+        return {read: [groupId]}
+
+      fakeGroups.focused = sinon.stub().returns({id: 'new-group'})
+      $rootScope.$broadcast(events.GROUP_FOCUSED)
+
+      assert.deepEqual(annotation.permissions.read, ['new-group'])
+
+    it "does not change perms when moving new private annotations", ->
+      # id must be null so that AnnotationController considers this a new
+      # annotation.
+      annotation.id = null
+      annotation.group = 'old-group'
+      annotation.permissions = {read: ['acct:bill@localhost']}
+      createDirective()
+
+      # This is a private annotation.
+      fakePermissions.isShared.returns(false)
+
+      fakeGroups.focused = sinon.stub().returns({id: 'new-group'})
+      $rootScope.$broadcast(events.GROUP_FOCUSED)
+
+      assert.deepEqual(annotation.permissions.read, ['acct:bill@localhost'],
+        'The annotation should still be private')
+
 
 describe("AnnotationController", ->
 
